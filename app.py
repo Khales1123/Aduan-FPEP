@@ -107,7 +107,7 @@ def update_vote(index):
     df.to_csv(FILE_PATH, index=False)
 
 # --- 3. PAGE LAYOUT ---
-menu = st.sidebar.radio("Navigation", ["📢 Student Wall", "🛡️ Founder Dashboard"])
+menu = st.sidebar.radio("Navigation", ["📢 Student Wall", "Admin Dashboard"])
 
 if menu == "📢 Student Wall":
     st.title("FPEP Voice Wall")
@@ -214,6 +214,7 @@ elif menu == "Admin Dashboard":
                 clean_df.to_csv(FILE_PATH, index=False)
                 st.success("Updated!")
                 st.rerun()
+
 
 
 
