@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta, timezone # <--- Added timezone tools
 import os
 
 # --- 1. CONFIGURATION & DESIGN ---
 st.set_page_config(page_title="FPEP Voice Wall", page_icon="📢", layout="centered")
 
-# Initialize Session State to track votes (This runs once per user visit)
+# Initialize Session State to track votes
 if "voted_posts" not in st.session_state:
     st.session_state.voted_posts = set()
 
@@ -48,7 +48,6 @@ st.markdown("""
     .status-Solved { background-color: #cce5ff; color: #004085; }
     
     /* Customizing the Upvote Button */
-    /* Normal State */
     .stButton button {
         background-color: white !important;
         color: var(--primary-maroon) !important;
@@ -60,7 +59,6 @@ st.markdown("""
     .stButton button:hover {
         background-color: #fcebeb !important;
     }
-    /* Disabled State (Already Voted) */
     .stButton button:disabled {
         background-color: #eee !important;
         color: #888 !important;
@@ -90,8 +88,15 @@ def load_data():
 
 def save_problem(category, problem_text):
     df = load_data()
+    
+    # --- MALAYSIA TIME LOGIC ---
+    # Define timezone offset for Malaysia (UTC + 8 hours)
+    malaysia_offset = timezone(timedelta(hours=8))
+    # Get current time in that timezone
+    current_time_my = datetime.now(malaysia_offset).strftime("%Y-%m-%d %H:%M")
+    
     new_data = pd.DataFrame({
-        "Timestamp": [datetime.now().strftime("%Y-%m-%d %H:%M")],
+        "Timestamp": [current_time_my],
         "Category": [category],
         "Problem": [problem_text],
         "Status": ["New"],
@@ -158,22 +163,13 @@ if menu == "📢 Student Wall":
                 """, unsafe_allow_html=True)
                 
             with col_btn:
-                # --- NEW VOTING LOGIC ---
-                
-                # Check if this specific post (index) is in our 'voted' list
+                # --- VOTING LOGIC ---
                 has_voted = index in st.session_state.voted_posts
-                
-                # Change Label and Disable if voted
                 btn_label = f"✅ {row['Upvotes']}" if has_voted else f"👍 {row['Upvotes']}"
                 
                 if st.button(btn_label, key=f"vote_{index}", disabled=has_voted):
-                    # 1. Update Database
                     update_vote(index)
-                    
-                    # 2. Add this post to the session's "Voted List"
                     st.session_state.voted_posts.add(index)
-                    
-                    # 3. Refresh
                     st.rerun()
 
     else:
@@ -214,7 +210,3 @@ elif menu == "Admin Dashboard":
                 clean_df.to_csv(FILE_PATH, index=False)
                 st.success("Updated!")
                 st.rerun()
-
-
-
-
