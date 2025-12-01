@@ -6,221 +6,189 @@ import os
 # --- 1. CONFIGURATION & DESIGN ---
 st.set_page_config(page_title="Student Voice Wall", page_icon="📢", layout="centered")
 
-# Custom CSS to force the Maroon Design
+# Custom CSS
 st.markdown("""
     <style>
-    /* Global Variables */
-    :root {
-        --primary-maroon: #800000;
-        --light-maroon: #a31515;
-    }
-    
-    /* Title Styling */
+    :root { --primary-maroon: #800000; --light-maroon: #a31515; }
     h1 { color: var(--primary-maroon) !important; }
     
-    /* Button Styling */
-    div.stButton > button {
-        background-color: var(--primary-maroon);
-        color: white;
-        border-radius: 20px;
-        border: none;
-        padding: 10px 24px;
-    }
-    div.stButton > button:hover {
-        background-color: var(--light-maroon);
-        color: white;
-        border-color: white;
-    }
-
-    /* The "Card" Design for the Wall */
-    .post-card {
+    /* Post Card Styling */
+    .post-card-header {
         background-color: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
+        padding: 20px 20px 5px 20px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
         border-left: 5px solid var(--primary-maroon);
+        border-top: 1px solid #eee;
+        border-right: 1px solid #eee;
     }
-    .post-header {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
+    .post-card-body {
+        background-color: white;
+        padding: 5px 20px 20px 20px;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        border-left: 5px solid var(--primary-maroon);
+        border-bottom: 1px solid #eee;
+        border-right: 1px solid #eee;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
     }
-    .post-content {
-        font-size: 16px;
-        color: #333;
-        margin-bottom: 15px;
-        white-space: pre-wrap;
-    }
-    .status-badge {
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-    /* Status Colors */
-    .status-New { background-color: #ffeeba; color: #856404; }
+    
+    .meta-text { font-size: 14px; color: #666; display: flex; justify-content: space-between; }
+    .main-text { font-size: 16px; color: #333; margin-top: 10px; white-space: pre-wrap; }
+    
+    /* Status Badges */
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;}
+    .status-New { background-color: #fff3cd; color: #856404; }
     .status-Reviewed { background-color: #d4edda; color: #155724; }
     .status-Solved { background-color: #cce5ff; color: #004085; }
     
+    /* Customizing the Upvote Button */
+    .stButton button {
+        background-color: white !important;
+        color: var(--primary-maroon) !important;
+        border: 1px solid var(--primary-maroon) !important;
+        border-radius: 50px !important;
+        font-size: 14px !important;
+        padding: 4px 15px !important;
+    }
+    .stButton button:hover {
+        background-color: #fcebeb !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. DATA HANDLING (DATABASE) ---
+# --- 2. DATA HANDLING ---
 FILE_PATH = 'problems.csv'
 
 def load_data():
-    """Loads data from CSV. Creates file if it doesn't exist."""
     if not os.path.exists(FILE_PATH):
         df = pd.DataFrame(columns=["Timestamp", "Category", "Problem", "Status", "Upvotes"])
         df.to_csv(FILE_PATH, index=False)
         return df
-    return pd.read_csv(FILE_PATH)
+    
+    df = pd.read_csv(FILE_PATH)
+    
+    # SAFETY CHECK: If old CSV lacks 'Upvotes' column, add it
+    if "Upvotes" not in df.columns:
+        df["Upvotes"] = 0
+        df.to_csv(FILE_PATH, index=False)
+        
+    return df
 
 def save_problem(category, problem_text):
-    """Saves a new problem to the CSV."""
     df = load_data()
     new_data = pd.DataFrame({
         "Timestamp": [datetime.now().strftime("%Y-%m-%d %H:%M")],
         "Category": [category],
         "Problem": [problem_text],
-        "Status": ["New"], # Default status
+        "Status": ["New"],
         "Upvotes": [0]
     })
-    # Append properly using concat
     df = pd.concat([df, new_data], ignore_index=True)
     df.to_csv(FILE_PATH, index=False)
 
-# --- 3. SIDEBAR (NAVIGATION & ADMIN) ---
+def update_vote(index):
+    """Increments the vote for a specific row index."""
+    df = load_data()
+    df.at[index, 'Upvotes'] += 1
+    df.to_csv(FILE_PATH, index=False)
+
+# --- 3. PAGE LAYOUT ---
 menu = st.sidebar.radio("Navigation", ["📢 Student Wall", "🛡️ Founder Dashboard"])
 
-st.sidebar.markdown("---")
-st.sidebar.info("This app saves data to `problems.csv` in the same folder.")
-
-# --- 4. PAGE: STUDENT WALL ---
 if menu == "📢 Student Wall":
-    
-    # Header
     st.title("Student Voice Wall")
-    st.markdown("Share your problems. We listen, track, and solve.")
     
-    # Input Form (Composer)
+    # --- COMPOSER SECTION ---
     with st.container():
         st.subheader("New Submission")
         col1, col2 = st.columns([3, 1])
-        
         with col1:
-            problem_text = st.text_area("What issue are you facing?", height=100, placeholder="Type your problem here...")
-        
+            problem_text = st.text_area("Your Voice", height=100, placeholder="What's the problem?", label_visibility="collapsed")
         with col2:
             category = st.selectbox("Category", ["Facilities", "Academic", "Management", "Suggestion"])
-            if st.button("Post to Wall"):
+            if st.button("Post", use_container_width=True):
                 if problem_text:
                     save_problem(category, problem_text)
-                    st.success("Posted successfully!")
-                    st.rerun() # Refresh page to show new post
-                else:
-                    st.error("Please write something first.")
+                    st.success("Posted!")
+                    st.rerun()
 
     st.markdown("---")
     st.subheader("Recent History")
 
-    # Display The Feed
+    # --- FEED SECTION ---
     df = load_data()
-    
     if not df.empty:
-        # Show newest first
+        # Loop through reversed dataframe (newest first)
         for index, row in df.iloc[::-1].iterrows():
             
-            # Determine Badge Color
+            # 1. VISUAL PART (HTML)
             status_class = f"status-{row['Status']}"
-            
-            # Create HTML Card
-            card_html = f"""
-            <div class="post-card">
-                <div class="post-header">
-                    <span><strong>Category:</strong> {row['Category']}</span>
-                    <span>{row['Timestamp']}</span>
+            st.markdown(f"""
+            <div class="post-card-header">
+                <div class="meta-text">
+                    <span><strong>{row['Category']}</strong></span>
+                    <span class="status-badge {status_class}">{row['Status']}</span>
                 </div>
-                <div class="post-content">
-                    {row['Problem']}
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span class="status-badge {status_class}">Status: {row['Status']}</span>
-                </div>
+                <div class="main-text">{row['Problem']}</div>
             </div>
-            """
-            st.markdown(card_html, unsafe_allow_html=True)
-    else:
-        st.info("No posts yet. Be the first to share a problem!")
+            """, unsafe_allow_html=True)
+            
+            # 2. INTERACTIVE PART (Streamlit Columns)
+            # We put the button inside a container that looks like the bottom of the card
+            col_left, col_btn = st.columns([5, 1])
+            
+            with col_left:
+                # Just closing the card visual with the timestamp
+                st.markdown(f"""
+                <div class="post-card-body">
+                    <small style='color:#888'>{row['Timestamp']}</small>
+                </div>
+                """, unsafe_allow_html=True)
+                
+            with col_btn:
+                # The Actual Button
+                # key=f"vote_{index}" ensures every button is unique
+                if st.button(f"👍 {row['Upvotes']}", key=f"vote_{index}"):
+                    update_vote(index)
+                    st.rerun()
 
-# --- 5. PAGE: FOUNDER DASHBOARD ---
+    else:
+        st.info("No posts yet.")
+
 elif menu == "🛡️ Founder Dashboard":
     st.title("Founder Dashboard")
-    
-    # Simple Password Check
     password = st.sidebar.text_input("Admin Password", type="password")
     
-    if password == "admin123": 
-        st.success("Logged in as Founder")
-        
-        # Load Data
+    if password == "admin123":
         df = load_data()
         
-        # 1. Metrics Row
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Total Problems", len(df))
-        col2.metric("Pending Review", len(df[df['Status'] == 'New']))
-        col3.metric("Resolved", len(df[df['Status'] == 'Solved']))
+        # Metrics
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Total", len(df))
+        c2.metric("New", len(df[df['Status'] == 'New']))
+        c3.metric("Total Upvotes", df['Upvotes'].sum())
         
         st.markdown("---")
         
-        # 2. Editable Data Table
-        st.subheader("Manage Problems")
-        st.caption("Change Status or check 'Delete' box to remove a post.")
-        
+        # Editor
         if not df.empty:
-            # Add a temporary "Delete" column for the UI (default is False/Unchecked)
             df["Delete"] = False
-
-            # Configure the Table
             edited_df = st.data_editor(
                 df,
                 column_config={
-                    "Status": st.column_config.SelectboxColumn(
-                        "Status",
-                        options=["New", "Reviewed", "Solved"],
-                        required=True,
-                    ),
-                    "Delete": st.column_config.CheckboxColumn(
-                        "Delete?",
-                        help="Check this box and click Save to remove the post",
-                        default=False,
-                    )
+                    "Status": st.column_config.SelectboxColumn("Status", options=["New", "Reviewed", "Solved"], required=True),
+                    "Delete": st.column_config.CheckboxColumn("Delete?", default=False),
+                    "Upvotes": st.column_config.NumberColumn("Votes", disabled=True)
                 },
-                disabled=["Timestamp", "Category", "Problem", "Upvotes"], # Prevent editing text, only allow Status/Delete
-                num_rows="fixed", # Disable adding new empty rows manually
-                use_container_width=True,
-                hide_index=True
+                disabled=["Timestamp", "Category", "Problem", "Upvotes"],
+                hide_index=True,
+                use_container_width=True
             )
             
-            # Save changes button
             if st.button("Save Changes"):
-                # 1. Filter out rows where Delete is True
-                # We keep only rows where Delete is False
-                clean_df = edited_df[edited_df["Delete"] == False]
-                
-                # 2. Remove the temporary 'Delete' column before saving to CSV
-                clean_df = clean_df.drop(columns=["Delete"])
-                
-                # 3. Save to file
+                clean_df = edited_df[edited_df["Delete"] == False].drop(columns=["Delete"])
                 clean_df.to_csv(FILE_PATH, index=False)
-                st.success("Database updated successfully!")
-                st.rerun() # Reload page to show changes
-        else:
-            st.info("No problems submitted yet.")
-            
-    else:
-        st.warning("Please enter the admin password in the sidebar to access the dashboard.")
+                st.success("Updated!")
+                st.rerun()
