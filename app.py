@@ -110,7 +110,7 @@ def update_vote(index):
 menu = st.sidebar.radio("Navigation", ["📢 Student Wall", "🛡️ Founder Dashboard"])
 
 if menu == "📢 Student Wall":
-    st.title("Student Voice Wall")
+    st.title("FPEP Voice Wall")
     
     # --- COMPOSER SECTION ---
     with st.container():
@@ -214,4 +214,5 @@ elif menu == "🛡️ Founder Dashboard":
                 clean_df.to_csv(FILE_PATH, index=False)
                 st.success("Updated!")
                 st.rerun()
+
 
