@@ -179,11 +179,11 @@ if menu == "📢 Student Wall":
     else:
         st.info("No posts yet.")
 
-elif menu == "🛡️ Founder Dashboard":
-    st.title("Founder Dashboard")
+elif menu == "Admin Dashboard":
+    st.title("Admin Dashboard")
     password = st.sidebar.text_input("Admin Password", type="password")
     
-    if password == "admin123":
+    if password == "khales23":
         df = load_data()
         
         # Metrics
@@ -214,5 +214,6 @@ elif menu == "🛡️ Founder Dashboard":
                 clean_df.to_csv(FILE_PATH, index=False)
                 st.success("Updated!")
                 st.rerun()
+
 
 
