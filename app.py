@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 # --- 1. CONFIGURATION & DESIGN ---
-st.set_page_config(page_title="Student Voice Wall", page_icon="📢", layout="centered")
+st.set_page_config(page_title="FPEP Voice Wall", page_icon="📢", layout="centered")
 
 # Initialize Session State to track votes (This runs once per user visit)
 if "voted_posts" not in st.session_state:
@@ -214,3 +214,4 @@ elif menu == "🛡️ Founder Dashboard":
                 clean_df.to_csv(FILE_PATH, index=False)
                 st.success("Updated!")
                 st.rerun()
+
