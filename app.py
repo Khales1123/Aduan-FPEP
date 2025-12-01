@@ -160,10 +160,10 @@ if menu == "📢 Student Wall":
 elif menu == "🛡️ Founder Dashboard":
     st.title("Founder Dashboard")
     
-    # Simple Password Check (For demo purposes)
+    # Simple Password Check
     password = st.sidebar.text_input("Admin Password", type="password")
     
-    if password == "admin123": # <--- You can change this password
+    if password == "admin123": 
         st.success("Logged in as Founder")
         
         # Load Data
@@ -179,26 +179,48 @@ elif menu == "🛡️ Founder Dashboard":
         
         # 2. Editable Data Table
         st.subheader("Manage Problems")
-        st.caption("Double click on 'Status' to change it (New -> Reviewed -> Solved)")
+        st.caption("Change Status or check 'Delete' box to remove a post.")
         
-        # Allow editing specifically the 'Status' column
-        edited_df = st.data_editor(
-            df,
-            column_config={
-                "Status": st.column_config.SelectboxColumn(
-                    "Status",
-                    options=["New", "Reviewed", "Solved"],
-                    required=True,
-                )
-            },
-            num_rows="dynamic",
-            use_container_width=True
-        )
-        
-        # Save changes button
-        if st.button("Save Changes"):
-            edited_df.to_csv(FILE_PATH, index=False)
-            st.success("Database updated!")
+        if not df.empty:
+            # Add a temporary "Delete" column for the UI (default is False/Unchecked)
+            df["Delete"] = False
+
+            # Configure the Table
+            edited_df = st.data_editor(
+                df,
+                column_config={
+                    "Status": st.column_config.SelectboxColumn(
+                        "Status",
+                        options=["New", "Reviewed", "Solved"],
+                        required=True,
+                    ),
+                    "Delete": st.column_config.CheckboxColumn(
+                        "Delete?",
+                        help="Check this box and click Save to remove the post",
+                        default=False,
+                    )
+                },
+                disabled=["Timestamp", "Category", "Problem", "Upvotes"], # Prevent editing text, only allow Status/Delete
+                num_rows="fixed", # Disable adding new empty rows manually
+                use_container_width=True,
+                hide_index=True
+            )
+            
+            # Save changes button
+            if st.button("Save Changes"):
+                # 1. Filter out rows where Delete is True
+                # We keep only rows where Delete is False
+                clean_df = edited_df[edited_df["Delete"] == False]
+                
+                # 2. Remove the temporary 'Delete' column before saving to CSV
+                clean_df = clean_df.drop(columns=["Delete"])
+                
+                # 3. Save to file
+                clean_df.to_csv(FILE_PATH, index=False)
+                st.success("Database updated successfully!")
+                st.rerun() # Reload page to show changes
+        else:
+            st.info("No problems submitted yet.")
             
     else:
         st.warning("Please enter the admin password in the sidebar to access the dashboard.")
