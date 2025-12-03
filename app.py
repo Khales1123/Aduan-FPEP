@@ -8,6 +8,7 @@ import time # Used for simulating delays
 st.set_page_config(page_title="FPEP Voice Wall & Auth", page_icon="🔑", layout="centered")
 
 # --- INITIALIZATION ---
+# Initialize Session State variables
 if "is_logged_in" not in st.session_state:
     st.session_state.is_logged_in = False
 if "voted_posts" not in st.session_state:
@@ -18,17 +19,16 @@ if "current_user" not in st.session_state:
 # Custom CSS
 st.markdown("""
     <style>
-    /* Menggunakan warna maroon dari CSS asal anda (#7e0000) */
     :root { 
-        --primary-maroon: #7e0000; 
+        --primary-maroon: #800000; 
         --light-maroon: #a31515; 
         --primary-blue: #1f50a2;
     }
     
     h1 { color: var(--primary-maroon) !important; }
-    h2 { color: var(--primary-maroon) !important; text-align: center; font-size: 32px; }
+    h2 { color: var(--primary-blue) !important; text-align: center; }
     
-    /* Post Card Styling (retained from Voice Wall) */
+    /* Post Card Styling */
     .post-card-header {
         background-color: white;
         padding: 20px 20px 5px 20px;
@@ -49,6 +49,7 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         margin-bottom: 20px;
     }
+    
     .meta-text { font-size: 14px; color: #666; display: flex; justify-content: space-between; }
     .main-text { font-size: 16px; color: #333; margin-top: 10px; white-space: pre-wrap; }
     
@@ -57,34 +58,23 @@ st.markdown("""
     .status-New { background-color: #fff3cd; color: #856404; }
     .status-Reviewed { background-color: #d4edda; color: #155724; }
     .status-Solved { background-color: #cce5ff; color: #004085; }
-
-    /* Customizing Auth Buttons (Maroon color from the CSS) */
+    
+    /* Customizing Auth Buttons */
     .stButton>button {
-        background-color: var(--primary-maroon);
+        background-color: var(--primary-blue);
         color: white;
         border: none;
-        border-radius: 40px; /* Matching the 40px radius from your CSS */
+        border-radius: 5px;
         padding: 10px;
         width: 100%;
         margin-top: 15px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, .3); 
-        transition: background-color 0.3s;
-    }
-    .stButton>button:hover {
-        background-color: var(--light-maroon);
-    }
-    .stContainer {
-        /* Styling the background of the auth form area */
-        background-color: #f7f9fc; 
-        border-radius: 15px;
-        padding: 20px;
     }
     
     </style>
 """, unsafe_allow_html=True)
 
 
-# --- DATA HANDLING FUNCTIONS ---
+# --- DATA HANDLING FUNCTIONS (From Voice Wall App) ---
 FILE_PATH = 'problems.csv'
 
 def load_data():
@@ -95,15 +85,21 @@ def load_data():
         return df
     
     df = pd.read_csv(FILE_PATH)
+    
     if "Upvotes" not in df.columns:
         df["Upvotes"] = 0
         df.to_csv(FILE_PATH, index=False)
+        
+    # Ensure Upvotes is int type
     df['Upvotes'] = df['Upvotes'].fillna(0).astype(int)
+        
     return df
 
 def save_problem(category, problem_text):
     """Saves a new problem submission."""
     df = load_data()
+    
+    # Define timezone offset for Malaysia (UTC + 8 hours)
     malaysia_offset = timezone(timedelta(hours=8))
     current_time_my = datetime.now(malaysia_offset).strftime("%Y-%m-%d %H:%M")
     
@@ -120,6 +116,7 @@ def save_problem(category, problem_text):
 def update_vote(index):
     """Increments the vote for a specific row index."""
     df = load_data()
+    # Safety check for index existence
     if index in df.index:
         df.loc[index, 'Upvotes'] += 1
         df.to_csv(FILE_PATH, index=False)
@@ -129,11 +126,12 @@ def update_vote(index):
 
 # --- AUTHENTICATION LOGIC ---
 
-# Credentials for demonstration
-# Admin: admin / khales23 (same as Admin Action Password)
-# Student: student / student123
 def handle_login(username, password):
-    """Simulates user login."""
+    """
+    Simulates user login. 
+    Hardcoded credentials for demonstration.
+    """
+    # NOTE: Using 'khales23' for admin login password as per previous consensus
     if username == "admin" and password == "khales23":
         st.session_state.is_logged_in = True
         st.session_state.current_user = "admin"
@@ -152,20 +150,21 @@ def handle_logout():
     st.rerun()
 
 def show_auth_form():
-    """Displays the combined Login/Sign Up forms side-by-side."""
+    """Displays only the Login form, centered."""
     
     st.title("Welcome to the FPEP Voice Wall")
-    st.markdown("Please sign in or register to continue.")
-    
-    # Use columns to mimic the side-by-side layout 
-    col1, col2 = st.columns(2)
+    st.markdown("Please sign in to continue.")
 
-    # --- SIGN IN FORM (Equivalent to form-box login) ---
-    with col1.container(border=True):
+    # Use Streamlit columns to center the single login form (2/4 width)
+    col_center_left, col_form, col_center_right = st.columns([1, 2, 1])
+
+    # --- SIGN IN FORM ---
+    with col_form.container(border=True):
         st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
         
+        # Placeholder updated for clarity on required credentials
         login_username = st.text_input("Username", key="login_user_auth", placeholder="admin (khales23) or student (student123)")
-        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Password")
+        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password")
         
         if st.button("Login", key="login_btn_auth", use_container_width=True):
             if login_username and login_password:
@@ -178,40 +177,19 @@ def show_auth_form():
                     st.error("Invalid credentials. Please try again.")
             else:
                 st.warning("Please enter both username and password.")
-        
-        st.markdown("<h3 style='text-align:center; margin-top: 30px; color:#555;'>Welcome Back!</h3>", unsafe_allow_html=True)
 
 
-    # --- SIGN UP FORM (Equivalent to form-box register) ---
-    with col2.container(border=True):
-        st.markdown("<h2>Sign Up</h2>", unsafe_allow_html=True)
-        
-        register_username = st.text_input("Username", key="reg_user_auth", placeholder="Choose a username")
-        register_email = st.text_input("Email", key="reg_email_auth", placeholder="Enter your email")
-        register_password = st.text_input("Password", type="password", key="reg_pass_auth", placeholder="Choose a secure password")
-        
-        # Placeholder for registration logic (no actual saving)
-        if st.button("Sign Up", key="register_btn_auth", use_container_width=True):
-            if register_username and register_email and register_password:
-                with st.spinner('Registering user...'):
-                    time.sleep(1)
-                st.success(f"Registration simulated for **{register_username}**. Please use 'student' to login.")
-            else:
-                st.warning("Please fill in all registration fields.")
-                
-        st.markdown("<h3 style='text-align:center; margin-top: 30px; color:#555;'>Hello, Friend!</h3>", unsafe_allow_html=True)
-        st.caption("Register with your details to use all features.")
-
-
-# --- MAIN APPLICATION VIEWS (Retained from previous version) ---
+# --- MAIN APPLICATION VIEWS ---
 
 def show_student_wall():
     """Displays the main student submission and voting wall."""
     st.title("📢 FPEP Voice Wall")
     
+    # --- LOGOUT BUTTON ---
     st.sidebar.button("Logout", on_click=handle_logout)
     st.sidebar.markdown(f"**Logged in as:** `{st.session_state.current_user}`")
 
+    # --- COMPOSER SECTION ---
     with st.container(border=True):
         st.subheader("New Submission")
         col1, col2 = st.columns([3, 1])
@@ -228,14 +206,18 @@ def show_student_wall():
     st.markdown("---")
     st.subheader("Recent History (Upvote the problems you agree with)")
 
+    # --- FEED SECTION ---
     df = load_data()
     if not df.empty:
+        # Loop through reversed dataframe (newest first)
         df_display = df.reset_index().iloc[::-1]
         
         for original_index, row in df_display.iterrows():
-            post_id = row['index'] 
-            status_class = f"status-{row['Status']}"
             
+            post_id = row['index'] 
+            
+            # 1. VISUAL PART (HTML)
+            status_class = f"status-{row['Status']}"
             st.markdown(f"""
             <div class="post-card-header">
                 <div class="meta-text">
@@ -246,6 +228,7 @@ def show_student_wall():
             </div>
             """, unsafe_allow_html=True)
             
+            # 2. INTERACTIVE PART (Streamlit Columns)
             col_left, col_btn = st.columns([5, 1])
             
             with col_left:
@@ -256,6 +239,7 @@ def show_student_wall():
                 """, unsafe_allow_html=True)
                 
             with col_btn:
+                # --- VOTING LOGIC ---
                 has_voted = post_id in st.session_state.voted_posts
                 btn_label = f"✅ {row['Upvotes']}" if has_voted else f"👍 {row['Upvotes']}"
                 
@@ -274,11 +258,15 @@ def show_admin_dashboard():
     st.sidebar.button("Logout", on_click=handle_logout)
     st.sidebar.markdown(f"**Logged in as:** `{st.session_state.current_user}`")
 
+    
+    # Admin password check (Admin-specific, separate from the main login)
     admin_password = st.text_input("Admin Action Password", type="password", key="admin_action_pass")
     
+    # Use the same admin password logic from the original code
     if admin_password == "khales23":
         df = load_data()
         
+        # Metrics
         c1, c2, c3 = st.columns(3)
         c1.metric("Total Posts", len(df))
         c2.metric("New Posts", len(df[df['Status'] == 'New']))
@@ -287,33 +275,47 @@ def show_admin_dashboard():
         st.markdown("---")
         st.subheader("Manage Submissions")
         
+        # Editor
         if not df.empty:
+            # Add a temporary column for deletion
             df["Delete"] = False
+            
+            # Reset index needed for correct display and updating logic
             df_editable = df.reset_index(drop=False)
             
             edited_df = st.data_editor(
                 df_editable,
                 column_config={
-                    "index": st.column_config.NumberColumn("Post ID", disabled=True),
+                    "index": st.column_config.NumberColumn("Post ID", disabled=True), # Display the internal index
                     "Status": st.column_config.SelectboxColumn("Status", options=["New", "Reviewed", "Solved"], required=True),
                     "Delete": st.column_config.CheckboxColumn("Delete?", default=False),
                     "Upvotes": st.column_config.NumberColumn("Votes", disabled=True)
                 },
+                # Disable all columns except Status and Delete
                 disabled=["Timestamp", "Category", "Problem", "Upvotes", "index"],
                 hide_index=True,
                 use_container_width=True
             )
             
             if st.button("Save Changes", key="admin_save_btn"):
+                # 1. Get the indices of posts to keep (where "Delete" is False)
                 posts_to_keep = edited_df[edited_df["Delete"] == False]
+                
+                # 2. Get the original DataFrame index values
                 original_indices_to_keep = posts_to_keep['index'].tolist()
                 
+                # 3. Create a clean version of the original DataFrame to save
+                # Map the changes back to the original index
+                
+                # Update statuses
                 for idx in original_indices_to_keep:
                     new_status = posts_to_keep[posts_to_keep['index'] == idx]['Status'].iloc[0]
                     df.loc[idx, 'Status'] = new_status
                 
+                # Remove deleted rows from the original DF
                 df_final = df.loc[original_indices_to_keep].drop(columns=["Delete"], errors='ignore')
                 
+                # Save the final DF
                 df_final.to_csv(FILE_PATH, index=False)
                 st.success("Changes saved successfully (Statuses updated and deletions processed)!")
                 st.rerun()
@@ -330,6 +332,7 @@ def show_admin_dashboard():
 if not st.session_state.is_logged_in:
     show_auth_form()
 else:
+    # Logic for logged-in user
     if st.session_state.current_user == "admin":
         menu = st.sidebar.radio("Navigation", ["📢 Student Wall", "🔒 Admin Dashboard"], index=1)
         if menu == "📢 Student Wall":
@@ -337,4 +340,5 @@ else:
         elif menu == "🔒 Admin Dashboard":
             show_admin_dashboard()
     else:
+        # Standard user only sees the Student Wall
         show_student_wall()
