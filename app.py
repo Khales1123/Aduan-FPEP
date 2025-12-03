@@ -227,7 +227,7 @@ def show_auth_form():
     with col_form.container(border=True):
         st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
         
-        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin or student (student123)")
+        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin or student")
         login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password (student123)")
         
         if st.button("Login", key="login_btn_auth", use_container_width=True):
@@ -386,4 +386,5 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
