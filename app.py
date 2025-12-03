@@ -64,7 +64,7 @@ VIDEO_BACKGROUND_HTML = """
 st.markdown(VIDEO_BACKGROUND_HTML, unsafe_allow_html=True)
 
 
-# --- Custom App Styling (Post Styling UPDATED with Strong Borders) ---
+# --- Custom App Styling (Post Styling UPDATED to White Background) ---
 st.markdown("""
     <style>
     :root { 
@@ -76,43 +76,43 @@ st.markdown("""
     h1 { color: var(--primary-maroon) !important; }
     h2 { color: var(--primary-blue) !important; text-align: center; }
     
-    /* Post Card Styling: Ensure cards are fully opaque white for reading */
+    /* Post Card Styling: Background is WHITE, Text is Dark */
     [data-testid="stContainer"] {
         background-color: white !important; 
     }
     
-    /* === BORDER CHANGES START HERE === */
+    /* === BORDER & COLOR CHANGES START HERE === */
     .post-card-header {
-        background-color: var(--primary-maroon) !important; /* DARK MAROON BACKGROUND */
+        background-color: white !important; /* WHITE BACKGROUND */
         padding: 20px 20px 5px 20px;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
-        color: #F0F0F0;
+        color: #333; /* Dark text color */
         
-        /* Stronger Border on Top, Left, Right */
-        border: 3px solid var(--light-maroon) !important; 
-        border-bottom: none !important; /* Remove the horizontal dividing line */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        /* Strong Maroon Border (3px) */
+        border: 3px solid var(--primary-maroon) !important; 
+        border-bottom: none !important; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Lighter shadow for white box */
     }
     
     .post-card-body {
-        background-color: var(--primary-maroon) !important; /* DARK MAROON BACKGROUND */
+        background-color: white !important; /* WHITE BACKGROUND */
         padding: 5px 20px 20px 20px;
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
-        color: #F0F0F0;
+        color: #333; /* Dark text color */
         
-        /* Stronger Border on Bottom, Left, Right */
-        border: 3px solid var(--light-maroon) !important;
-        border-top: none !important; /* Remove the horizontal dividing line */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        /* Strong Maroon Border (3px) */
+        border: 3px solid var(--primary-maroon) !important;
+        border-top: none !important; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         margin-bottom: 20px;
     }
     
-    /* Ensure the metadata and main text are light colored */
-    .meta-text { font-size: 14px; color: #F0F0F0; display: flex; justify-content: space-between; } 
-    .main-text { font-size: 16px; color: white; margin-top: 10px; white-space: pre-wrap; }
-    /* === BORDER CHANGES END HERE === */
+    /* Ensure the metadata and main text are dark colored */
+    .meta-text { font-size: 14px; color: #333; display: flex; justify-content: space-between; } 
+    .main-text { font-size: 16px; color: #333; margin-top: 10px; white-space: pre-wrap; }
+    /* === BORDER & COLOR CHANGES END HERE === */
 
     
     /* Status Badges */
@@ -276,7 +276,7 @@ def show_student_wall():
             post_id = row['index'] 
             status_class = f"status-{row['Status']}"
             
-            # --- POST CARD HEADER (Strong Border Defined in CSS) ---
+            # --- POST CARD HEADER ---
             st.markdown(f"""
             <div class="post-card-header">
                 <div class="meta-text">
@@ -290,22 +290,18 @@ def show_student_wall():
             col_left, col_btn = st.columns([5, 1])
             
             with col_left:
-                # --- POST CARD BODY LEFT (Part of the continuous border) ---
+                # --- POST CARD BODY LEFT (Timestamp text color set to primary maroon) ---
                 st.markdown(f"""
                 <div class="post-card-body">
-                    <small style='color:#F0F0F0'>Posted: {row['Timestamp']}</small>
+                    <small style='color:var(--primary-maroon)'>Posted: {row['Timestamp']}</small>
                 </div>
                 """, unsafe_allow_html=True) 
                 
             with col_btn:
-                # --- BUTTON COLUMN (Visually continuous with post-card-body) ---
-                # Note: We can't apply CSS to st.columns directly, but the main content area has a strong background, 
-                # and the button itself is maroon, helping the visual connection.
+                # --- BUTTON COLUMN ---
                 has_voted = post_id in st.session_state.voted_posts
                 btn_label = f"✅ {row['Upvotes']}" if has_voted else f"👍 {row['Upvotes']}"
                 
-                # Use a transparent button style or similar to fit the design (not possible with current CSS block, 
-                # so we rely on the default Streamlit button style here).
                 if st.button(btn_label, key=f"vote_{post_id}", disabled=has_voted, use_container_width=True):
                     update_vote(post_id)
                     st.session_state.voted_posts.add(post_id)
