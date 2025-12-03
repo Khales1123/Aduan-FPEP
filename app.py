@@ -15,45 +15,18 @@ if "voted_posts" not in st.session_state:
 if "current_user" not in st.session_state:
     st.session_state.current_user = None
 
-# Custom CSS (Keeping the original maroon/blue theme for consistency)
+# Custom CSS
 st.markdown("""
     <style>
+    /* Menggunakan warna maroon dari CSS asal anda (#7e0000) */
     :root { 
-        --primary-maroon: #7e0000; /* Matching the CSS button/toggle color */
+        --primary-maroon: #7e0000; 
         --light-maroon: #a31515; 
         --primary-blue: #1f50a2;
     }
     
     h1 { color: var(--primary-maroon) !important; }
     h2 { color: var(--primary-maroon) !important; text-align: center; font-size: 32px; }
-    
-    /* Input Container Styling */
-    div[data-testid="stTextInput"], div[data-testid="stTextarea"], div[data-testid="stSelectbox"] {
-        margin-bottom: 5px;
-    }
-    
-    /* Auth Form Styling */
-    .auth-container {
-        padding: 1.5rem;
-        background-color: white;
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Customizing Auth Buttons (Maroon color from the CSS) */
-    .stButton>button {
-        background-color: var(--primary-maroon);
-        color: white;
-        border: none;
-        border-radius: 40px; 
-        padding: 10px;
-        width: 100%;
-        margin-top: 15px;
-        transition: background-color 0.3s;
-    }
-    .stButton>button:hover {
-        background-color: var(--light-maroon);
-    }
     
     /* Post Card Styling (retained from Voice Wall) */
     .post-card-header {
@@ -78,10 +51,35 @@ st.markdown("""
     }
     .meta-text { font-size: 14px; color: #666; display: flex; justify-content: space-between; }
     .main-text { font-size: 16px; color: #333; margin-top: 10px; white-space: pre-wrap; }
+    
+    /* Status Badges */
     .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;}
     .status-New { background-color: #fff3cd; color: #856404; }
     .status-Reviewed { background-color: #d4edda; color: #155724; }
     .status-Solved { background-color: #cce5ff; color: #004085; }
+
+    /* Customizing Auth Buttons (Maroon color from the CSS) */
+    .stButton>button {
+        background-color: var(--primary-maroon);
+        color: white;
+        border: none;
+        border-radius: 40px; /* Matching the 40px radius from your CSS */
+        padding: 10px;
+        width: 100%;
+        margin-top: 15px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .3); 
+        transition: background-color 0.3s;
+    }
+    .stButton>button:hover {
+        background-color: var(--light-maroon);
+    }
+    .stContainer {
+        /* Styling the background of the auth form area */
+        background-color: #f7f9fc; 
+        border-radius: 15px;
+        padding: 20px;
+    }
+    
     </style>
 """, unsafe_allow_html=True)
 
@@ -159,16 +157,15 @@ def show_auth_form():
     st.title("Welcome to the FPEP Voice Wall")
     st.markdown("Please sign in or register to continue.")
     
-    # Use columns to mimic the side-by-side layout (Form Box + Toggle Panel structure)
+    # Use columns to mimic the side-by-side layout 
     col1, col2 = st.columns(2)
 
     # --- SIGN IN FORM (Equivalent to form-box login) ---
     with col1.container(border=True):
         st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
         
-        # Text input fields
-        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin (khales23) or student (student123)", label_visibility="collapsed")
-        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Password", label_visibility="collapsed")
+        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin (khales23) or student (student123)")
+        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Password")
         
         if st.button("Login", key="login_btn_auth", use_container_width=True):
             if login_username and login_password:
@@ -182,19 +179,16 @@ def show_auth_form():
             else:
                 st.warning("Please enter both username and password.")
         
-        # Mimic toggle panel content for Sign In (Welcome Back!)
         st.markdown("<h3 style='text-align:center; margin-top: 30px; color:#555;'>Welcome Back!</h3>", unsafe_allow_html=True)
-        st.caption("Don't have an account? Use the Sign Up form.")
 
 
     # --- SIGN UP FORM (Equivalent to form-box register) ---
     with col2.container(border=True):
         st.markdown("<h2>Sign Up</h2>", unsafe_allow_html=True)
         
-        # Text input fields
-        register_username = st.text_input("Username", key="reg_user_auth", placeholder="Choose a username", label_visibility="collapsed")
-        register_email = st.text_input("Email", key="reg_email_auth", placeholder="Enter your email", label_visibility="collapsed")
-        register_password = st.text_input("Password", type="password", key="reg_pass_auth", placeholder="Choose a secure password", label_visibility="collapsed")
+        register_username = st.text_input("Username", key="reg_user_auth", placeholder="Choose a username")
+        register_email = st.text_input("Email", key="reg_email_auth", placeholder="Enter your email")
+        register_password = st.text_input("Password", type="password", key="reg_pass_auth", placeholder="Choose a secure password")
         
         # Placeholder for registration logic (no actual saving)
         if st.button("Sign Up", key="register_btn_auth", use_container_width=True):
@@ -205,7 +199,6 @@ def show_auth_form():
             else:
                 st.warning("Please fill in all registration fields.")
                 
-        # Mimic toggle panel content for Sign Up (Hello, Friend!)
         st.markdown("<h3 style='text-align:center; margin-top: 30px; color:#555;'>Hello, Friend!</h3>", unsafe_allow_html=True)
         st.caption("Register with your details to use all features.")
 
