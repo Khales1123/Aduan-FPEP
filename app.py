@@ -64,7 +64,7 @@ VIDEO_BACKGROUND_HTML = """
 st.markdown(VIDEO_BACKGROUND_HTML, unsafe_allow_html=True)
 
 
-# --- Custom App Styling (Post Styling UPDATED to White Background) ---
+# --- Custom App Styling (Post Styling UPDATED to Maroon Box with White Border) ---
 st.markdown("""
     <style>
     :root { 
@@ -76,42 +76,42 @@ st.markdown("""
     h1 { color: var(--primary-maroon) !important; }
     h2 { color: var(--primary-blue) !important; text-align: center; }
     
-    /* Post Card Styling: Background is WHITE, Text is Dark */
+    /* Post Card Styling: Background is MAROON, Text is Light */
     [data-testid="stContainer"] {
         background-color: white !important; 
     }
     
     /* === BORDER & COLOR CHANGES START HERE === */
     .post-card-header {
-        background-color: white !important; /* WHITE BACKGROUND */
+        background-color: var(--primary-maroon) !important; /* MAROON BACKGROUND */
         padding: 20px 20px 5px 20px;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
-        color: #333; /* Dark text color */
+        color: #F0F0F0; /* Light text color */
         
-        /* Strong Maroon Border (3px) */
-        border: 3px solid var(--primary-maroon) !important; 
-        border-bottom: none !important; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Lighter shadow for white box */
+        /* Strong WHITE Border (3px) */
+        border: 3px solid white !important; 
+        border-bottom: none !important; /* Seamless connection */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
     
     .post-card-body {
-        background-color: white !important; /* WHITE BACKGROUND */
+        background-color: var(--primary-maroon) !important; /* MAROON BACKGROUND */
         padding: 5px 20px 20px 20px;
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
-        color: #333; /* Dark text color */
+        color: #F0F0F0; /* Light text color */
         
-        /* Strong Maroon Border (3px) */
-        border: 3px solid var(--primary-maroon) !important;
-        border-top: none !important; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        /* Strong WHITE Border (3px) */
+        border: 3px solid white !important;
+        border-top: none !important; /* Seamless connection */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         margin-bottom: 20px;
     }
     
-    /* Ensure the metadata and main text are dark colored */
-    .meta-text { font-size: 14px; color: #333; display: flex; justify-content: space-between; } 
-    .main-text { font-size: 16px; color: #333; margin-top: 10px; white-space: pre-wrap; }
+    /* Ensure the metadata and main text are light colored */
+    .meta-text { font-size: 14px; color: #F0F0F0; display: flex; justify-content: space-between; } 
+    .main-text { font-size: 16px; color: white; margin-top: 10px; white-space: pre-wrap; }
     /* === BORDER & COLOR CHANGES END HERE === */
 
     
@@ -290,10 +290,10 @@ def show_student_wall():
             col_left, col_btn = st.columns([5, 1])
             
             with col_left:
-                # --- POST CARD BODY LEFT (Timestamp text color set to primary maroon) ---
+                # --- POST CARD BODY LEFT (Timestamp text color set to light gray) ---
                 st.markdown(f"""
                 <div class="post-card-body">
-                    <small style='color:var(--primary-maroon)'>Posted: {row['Timestamp']}</small>
+                    <small style='color:#F0F0F0'>Posted: {row['Timestamp']}</small>
                 </div>
                 """, unsafe_allow_html=True) 
                 
