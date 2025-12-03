@@ -64,7 +64,7 @@ VIDEO_BACKGROUND_HTML = """
 st.markdown(VIDEO_BACKGROUND_HTML, unsafe_allow_html=True)
 
 
-# --- Custom App Styling (UPDATED with White Text Stroke) ---
+# --- Custom App Styling (Post Styling UPDATED to Maroon Box with White Border) ---
 st.markdown("""
     <style>
     :root { 
@@ -76,7 +76,7 @@ st.markdown("""
     h1 { color: var(--primary-maroon) !important; }
     h2 { color: var(--primary-blue) !important; text-align: center; }
     
-    /* Post Card Styling: Background is MAROON, Border is WHITE */
+    /* Post Card Styling: Background is MAROON, Text is Light */
     [data-testid="stContainer"] {
         background-color: white !important; 
     }
@@ -87,11 +87,11 @@ st.markdown("""
         padding: 20px 20px 5px 20px;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
-        color: white; /* Base text color for header */
+        color: #F0F0F0; /* Light text color */
         
         /* Strong WHITE Border (3px) */
         border: 3px solid white !important; 
-        border-bottom: none !important; 
+        border-bottom: none !important; /* Seamless connection */
         box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
     
@@ -100,31 +100,18 @@ st.markdown("""
         padding: 5px 20px 20px 20px;
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
-        color: white; /* Base text color for body */
+        color: #F0F0F0; /* Light text color */
         
         /* Strong WHITE Border (3px) */
         border: 3px solid white !important;
-        border-top: none !important; 
+        border-top: none !important; /* Seamless connection */
         box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         margin-bottom: 20px;
     }
     
-    /* Apply White Stroke to Text in Header and Body for readability over dark background */
-    .meta-text, .main-text, .post-card-body small {
-        color: white !important; /* Ensure the text core is white */
-        text-shadow: 
-            -1px -1px 0 #333,  
-             1px -1px 0 #333,
-            -1px 1px 0 #333,
-             1px 1px 0 #333; /* Dark shadow to act as an outline */
-        font-weight: 600;
-    }
-    /* Note: Text stroke functionality is limited in standard CSS. 
-       We are using a dark text-shadow hack here, but if you want 
-       the text to be white with a white outline, it defeats the purpose.
-       Assuming you want a clear outline over the maroon background, 
-       I've used a DARK outline for contrast, while the text itself is WHITE.
-    */
+    /* Ensure the metadata and main text are light colored */
+    .meta-text { font-size: 14px; color: #F0F0F0; display: flex; justify-content: space-between; } 
+    .main-text { font-size: 16px; color: white; margin-top: 10px; white-space: pre-wrap; }
     /* === BORDER & COLOR CHANGES END HERE === */
 
     
@@ -303,10 +290,10 @@ def show_student_wall():
             col_left, col_btn = st.columns([5, 1])
             
             with col_left:
-                # --- POST CARD BODY LEFT (Timestamp) ---
+                # --- POST CARD BODY LEFT (Timestamp text color set to light gray) ---
                 st.markdown(f"""
                 <div class="post-card-body">
-                    <small style='color:white'>Posted: {row['Timestamp']}</small>
+                    <small style='color:#F0F0F0'>Posted: {row['Timestamp']}</small>
                 </div>
                 """, unsafe_allow_html=True) 
                 
