@@ -163,8 +163,8 @@ def show_auth_form():
         st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
         
         # Placeholder updated for clarity on required credentials
-        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin (khales23) or student (student123)")
-        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password")
+        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin or student")
+        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password (student123)")
         
         if st.button("Login", key="login_btn_auth", use_container_width=True):
             if login_username and login_password:
@@ -342,3 +342,4 @@ else:
     else:
         # Standard user only sees the Student Wall
         show_student_wall()
+
