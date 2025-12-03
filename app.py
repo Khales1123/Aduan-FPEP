@@ -131,7 +131,7 @@ def handle_login(username, password):
     Simulates user login. 
     Hardcoded credentials for demonstration.
     """
-    if username == "admin" and password == "admin123":
+    if username == "admin" and password == "khales23":
         st.session_state.is_logged_in = True
         st.session_state.current_user = "admin"
         return True
@@ -356,3 +356,4 @@ else:
     else:
         # Standard user only sees the Student Wall
         show_student_wall()
+
