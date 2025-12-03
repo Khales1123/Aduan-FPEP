@@ -1,66 +1,134 @@
 import streamlit as st
 
-import time
+import pandas as pd
+
+from datetime import datetime, timedelta, timezone # <--- Added timezone tools
+
+import os
 
 
 
 # --- 1. CONFIGURATION & DESIGN ---
 
-st.set_page_config(page_title="Login / Sign Up UI", page_icon="🔑", layout="centered")
+st.set_page_config(page_title="FPEP Voice Wall", page_icon="📢", layout="centered")
 
 
 
-# Custom CSS for better presentation (optional, but nice)
+# Initialize Session State to track votes
+
+if "voted_posts" not in st.session_state:
+
+    st.session_state.voted_posts = set()
+
+
+
+# Custom CSS
 
 st.markdown("""
 
     <style>
 
-    /* Center the main content better */
+    :root { --primary-maroon: #800000; --light-maroon: #a31515; }
 
-    .stApp {
+    h1 { color: var(--primary-maroon) !important; }
 
-        background-color: #f7f9fc;
+    
 
-    }
+    /* Post Card Styling */
 
-    .stContainer {
-
-        padding: 2rem;
+    .post-card-header {
 
         background-color: white;
 
-        border-radius: 10px;
+        padding: 20px 20px 5px 20px;
 
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-top-left-radius: 12px;
+
+        border-top-right-radius: 12px;
+
+        border-left: 5px solid var(--primary-maroon);
+
+        border-top: 1px solid #eee;
+
+        border-right: 1px solid #eee;
 
     }
 
-    h2 {
+    .post-card-body {
 
-        color: #1f50a2; /* A nice blue color */
+        background-color: white;
 
-        text-align: center;
+        padding: 5px 20px 20px 20px;
+
+        border-bottom-left-radius: 12px;
+
+        border-bottom-right-radius: 12px;
+
+        border-left: 5px solid var(--primary-maroon);
+
+        border-bottom: 1px solid #eee;
+
+        border-right: 1px solid #eee;
+
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 
         margin-bottom: 20px;
 
     }
 
-    .stButton>button {
+    
 
-        background-color: #1f50a2;
+    .meta-text { font-size: 14px; color: #666; display: flex; justify-content: space-between; }
 
-        color: white;
+    .main-text { font-size: 16px; color: #333; margin-top: 10px; white-space: pre-wrap; }
 
-        border: none;
+    
 
-        border-radius: 5px;
+    /* Status Badges */
 
-        padding: 10px;
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;}
 
-        width: 100%;
+    .status-New { background-color: #fff3cd; color: #856404; }
 
-        margin-top: 15px;
+    .status-Reviewed { background-color: #d4edda; color: #155724; }
+
+    .status-Solved { background-color: #cce5ff; color: #004085; }
+
+    
+
+    /* Customizing the Upvote Button */
+
+    .stButton button {
+
+        background-color: white !important;
+
+        color: var(--primary-maroon) !important;
+
+        border: 1px solid var(--primary-maroon) !important;
+
+        border-radius: 50px !important;
+
+        font-size: 14px !important;
+
+        padding: 4px 15px !important;
+
+    }
+
+    .stButton button:hover {
+
+        background-color: #fcebeb !important;
+
+    }
+
+    .stButton button:disabled {
+
+        background-color: #eee !important;
+
+        color: #888 !important;
+
+        border: 1px solid #ccc !important;
+
+        cursor: not-allowed;
 
     }
 
@@ -70,92 +138,286 @@ st.markdown("""
 
 
 
-st.title("Welcome to the App")
+# --- 2. DATA HANDLING ---
 
-st.markdown("A Streamlit version of your Login/Sign Up interface.")
-
-
-
-# Use Streamlit columns to display Sign In and Sign Up forms side-by-side
-
-col1, col2 = st.columns(2)
+FILE_PATH = 'problems.csv'
 
 
 
-# --- 2. SIGN IN FORM (Equivalent to form-box login) ---
+def load_data():
 
-with col1.container(border=True):
+    if not os.path.exists(FILE_PATH):
 
-    st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
+        df = pd.DataFrame(columns=["Timestamp", "Category", "Problem", "Status", "Upvotes"])
+
+        df.to_csv(FILE_PATH, index=False)
+
+        return df
 
     
 
-    # Text input fields
-
-    login_username = st.text_input("Username", key="login_user", placeholder="Enter your username")
-
-    login_password = st.text_input("Password", type="password", key="login_pass", placeholder="Enter your password")
+    df = pd.read_csv(FILE_PATH)
 
     
 
-    # Login Button
+    # SAFETY CHECK: If old CSV lacks 'Upvotes' column, add it
 
-    if st.button("Login", key="login_btn", use_container_width=True):
+    if "Upvotes" not in df.columns:
 
-        if login_username and login_password:
+        df["Upvotes"] = 0
 
-            # Placeholder action for login
+        df.to_csv(FILE_PATH, index=False)
 
-            with st.spinner('Logging in...'):
+        
 
-                time.sleep(1) # Simulate network delay
-
-            st.success(f"Successfully logged in as **{login_username}**!")
-
-        else:
-
-            st.warning("Please enter both username and password.")
+    return df
 
 
 
-# --- 3. SIGN UP FORM (Equivalent to form-box register) ---
+def save_problem(category, problem_text):
 
-with col2.container(border=True):
-
-    st.markdown("<h2>Sign Up</h2>", unsafe_allow_html=True)
+    df = load_data()
 
     
 
-    # Text input fields
+    # --- MALAYSIA TIME LOGIC ---
 
-    register_username = st.text_input("Username", key="reg_user", placeholder="Choose a username")
+    # Define timezone offset for Malaysia (UTC + 8 hours)
 
-    register_email = st.text_input("Email", key="reg_email", placeholder="Enter your email")
+    malaysia_offset = timezone(timedelta(hours=8))
 
-    register_password = st.text_input("Password", type="password", key="reg_pass", placeholder="Choose a secure password")
+    # Get current time in that timezone
+
+    current_time_my = datetime.now(malaysia_offset).strftime("%Y-%m-%d %H:%M")
 
     
 
-    # Sign Up Button
+    new_data = pd.DataFrame({
 
-    if st.button("Sign Up", key="register_btn", use_container_width=True):
+        "Timestamp": [current_time_my],
 
-        if register_username and register_email and register_password:
+        "Category": [category],
 
-            # Placeholder action for registration
+        "Problem": [problem_text],
 
-            with st.spinner('Registering user...'):
+        "Status": ["New"],
 
-                time.sleep(1) # Simulate network delay
+        "Upvotes": [0]
 
-            st.success(f"Account for **{register_username}** created! Check **{register_email}** for verification.")
+    })
 
-        else:
+    df = pd.concat([df, new_data], ignore_index=True)
 
-            st.warning("Please fill in all registration fields.")
+    df.to_csv(FILE_PATH, index=False)
 
 
 
-st.markdown("---")
+def update_vote(index):
 
-st.info("In a real application, the actions would interact with a database for authentication.")
+    """Increments the vote for a specific row index."""
+
+    df = load_data()
+
+    df.at[index, 'Upvotes'] += 1
+
+    df.to_csv(FILE_PATH, index=False)
+
+
+
+# --- 3. PAGE LAYOUT ---
+
+menu = st.sidebar.radio("Navigation", ["📢 Student Wall", "Admin Dashboard"])
+
+
+
+if menu == "📢 Student Wall":
+
+    st.title("FPEP Voice Wall")
+
+    
+
+    # --- COMPOSER SECTION ---
+
+    with st.container():
+
+        st.subheader("New Submission")
+
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+
+            problem_text = st.text_area("Your Voice", height=100, placeholder="What's the problem?", label_visibility="collapsed")
+
+        with col2:
+
+            category = st.selectbox("Category", ["Facilities", "Academic", "Management", "Suggestion"])
+
+            if st.button("Post", use_container_width=True):
+
+                if problem_text:
+
+                    save_problem(category, problem_text)
+
+                    st.success("Posted!")
+
+                    st.rerun()
+
+
+
+    st.markdown("---")
+
+    st.subheader("Recent History")
+
+
+
+    # --- FEED SECTION ---
+
+    df = load_data()
+
+    if not df.empty:
+
+        # Loop through reversed dataframe (newest first)
+
+        for index, row in df.iloc[::-1].iterrows():
+
+            
+
+            # 1. VISUAL PART (HTML)
+
+            status_class = f"status-{row['Status']}"
+
+            st.markdown(f"""
+
+            <div class="post-card-header">
+
+                <div class="meta-text">
+
+                    <span><strong>{row['Category']}</strong></span>
+
+                    <span class="status-badge {status_class}">{row['Status']}</span>
+
+                </div>
+
+                <div class="main-text">{row['Problem']}</div>
+
+            </div>
+
+            """, unsafe_allow_html=True)
+
+            
+
+            # 2. INTERACTIVE PART (Streamlit Columns)
+
+            col_left, col_btn = st.columns([5, 1])
+
+            
+
+            with col_left:
+
+                st.markdown(f"""
+
+                <div class="post-card-body">
+
+                    <small style='color:#888'>{row['Timestamp']}</small>
+
+                </div>
+
+                """, unsafe_allow_html=True)
+
+                
+
+            with col_btn:
+
+                # --- VOTING LOGIC ---
+
+                has_voted = index in st.session_state.voted_posts
+
+                btn_label = f"✅ {row['Upvotes']}" if has_voted else f"👍 {row['Upvotes']}"
+
+                
+
+                if st.button(btn_label, key=f"vote_{index}", disabled=has_voted):
+
+                    update_vote(index)
+
+                    st.session_state.voted_posts.add(index)
+
+                    st.rerun()
+
+
+
+    else:
+
+        st.info("No posts yet.")
+
+
+
+elif menu == "Admin Dashboard":
+
+    st.title("Admin Dashboard")
+
+    password = st.sidebar.text_input("Admin Password", type="password")
+
+    
+
+    if password == "khales23":
+
+        df = load_data()
+
+        
+
+        # Metrics
+
+        c1, c2, c3 = st.columns(3)
+
+        c1.metric("Total", len(df))
+
+        c2.metric("New", len(df[df['Status'] == 'New']))
+
+        c3.metric("Total Upvotes", df['Upvotes'].sum())
+
+        
+
+        st.markdown("---")
+
+        
+
+        # Editor
+
+        if not df.empty:
+
+            df["Delete"] = False
+
+            edited_df = st.data_editor(
+
+                df,
+
+                column_config={
+
+                    "Status": st.column_config.SelectboxColumn("Status", options=["New", "Reviewed", "Solved"], required=True),
+
+                    "Delete": st.column_config.CheckboxColumn("Delete?", default=False),
+
+                    "Upvotes": st.column_config.NumberColumn("Votes", disabled=True)
+
+                },
+
+                disabled=["Timestamp", "Category", "Problem", "Upvotes"],
+
+                hide_index=True,
+
+                use_container_width=True
+
+            )
+
+            
+
+            if st.button("Save Changes"):
+
+                clean_df = edited_df[edited_df["Delete"] == False].drop(columns=["Delete"])
+
+                clean_df.to_csv(FILE_PATH, index=False)
+
+                st.success("Updated!")
+
+                st.rerun()
