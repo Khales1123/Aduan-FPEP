@@ -4,19 +4,68 @@ from datetime import datetime, timedelta, timezone
 import os
 import time # Used for simulating delays
 
-# --- CONFIGURATION & DESIGN ---
+# --- 1. CONFIGURATION & DESIGN ---
 st.set_page_config(page_title="FPEP Voice Wall & Auth", page_icon="🔑", layout="centered")
 
-# --- INITIALIZATION ---
-# Initialize Session State variables
-if "is_logged_in" not in st.session_state:
-    st.session_state.is_logged_in = False
-if "voted_posts" not in st.session_state:
-    st.session_state.voted_posts = set()
-if "current_user" not in st.session_state:
-    st.session_state.current_user = None
+# --- VIDEO BACKGROUND INJECTION ---
 
-# Custom CSS
+# CSS/HTML to set an MP4 file as a fixed, fullscreen background.
+# NOTE: Replace 'YOUR_VIDEO_URL.mp4' with a direct link to your video file.
+VIDEO_BACKGROUND_HTML = """
+<style>
+/* 1. Hide the default Streamlit background */
+.stApp {
+    background: transparent !important;
+}
+
+/* 2. Create the video container and place it on the lowest layer */
+#video-background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1000; /* Place it behind everything */
+    overflow: hidden;
+}
+
+#video-background-container video {
+    min-width: 100%; 
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Dim the video slightly to make text easier to read */
+    opacity: 0.7; 
+}
+
+/* 3. Ensure the main Streamlit content remains readable over the video */
+/* This targets the main content block and the sidebar */
+.stApp > header, 
+.stApp > div:first-child > div:nth-child(2) > div:first-child,
+.stApp > div:nth-child(1) > div:nth-child(1) { 
+    background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white background for readability */
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+</style>
+
+<!-- HTML video injection -->
+<div id="video-background-container">
+    <video autoplay muted loop>
+        <source src="YOUR_VIDEO_URL.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+</div>
+"""
+st.markdown(VIDEO_BACKGROUND_HTML, unsafe_allow_html=True)
+
+
+# --- Custom App Styling (To blend with the video content) ---
 st.markdown("""
     <style>
     :root { 
@@ -28,30 +77,10 @@ st.markdown("""
     h1 { color: var(--primary-maroon) !important; }
     h2 { color: var(--primary-blue) !important; text-align: center; }
     
-    /* Post Card Styling */
-    .post-card-header {
-        background-color: white;
-        padding: 20px 20px 5px 20px;
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-        border-left: 5px solid var(--primary-maroon);
-        border-top: 1px solid #eee;
-        border-right: 1px solid #eee;
+    /* Post Card Styling (ensure cards are fully opaque white for reading) */
+    .post-card-header, .post-card-body, [data-testid="stContainer"] {
+        background-color: white !important; 
     }
-    .post-card-body {
-        background-color: white;
-        padding: 5px 20px 20px 20px;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-        border-left: 5px solid var(--primary-maroon);
-        border-bottom: 1px solid #eee;
-        border-right: 1px solid #eee;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
-    }
-    
-    .meta-text { font-size: 14px; color: #666; display: flex; justify-content: space-between; }
-    .main-text { font-size: 16px; color: #333; margin-top: 10px; white-space: pre-wrap; }
     
     /* Status Badges */
     .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;}
@@ -74,7 +103,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# --- DATA HANDLING FUNCTIONS (From Voice Wall App) ---
+# --- 2. INITIALIZATION ---
+if "is_logged_in" not in st.session_state:
+    st.session_state.is_logged_in = False
+if "voted_posts" not in st.session_state:
+    st.session_state.voted_posts = set()
+if "current_user" not in st.session_state:
+    st.session_state.current_user = None
+
+
+# --- 3. DATA HANDLING FUNCTIONS ---
 FILE_PATH = 'problems.csv'
 
 def load_data():
@@ -90,16 +128,12 @@ def load_data():
         df["Upvotes"] = 0
         df.to_csv(FILE_PATH, index=False)
         
-    # Ensure Upvotes is int type
     df['Upvotes'] = df['Upvotes'].fillna(0).astype(int)
-        
     return df
 
 def save_problem(category, problem_text):
     """Saves a new problem submission."""
     df = load_data()
-    
-    # Define timezone offset for Malaysia (UTC + 8 hours)
     malaysia_offset = timezone(timedelta(hours=8))
     current_time_my = datetime.now(malaysia_offset).strftime("%Y-%m-%d %H:%M")
     
@@ -116,7 +150,6 @@ def save_problem(category, problem_text):
 def update_vote(index):
     """Increments the vote for a specific row index."""
     df = load_data()
-    # Safety check for index existence
     if index in df.index:
         df.loc[index, 'Upvotes'] += 1
         df.to_csv(FILE_PATH, index=False)
@@ -124,14 +157,13 @@ def update_vote(index):
         st.error(f"Error: Post index {index} not found.")
 
 
-# --- AUTHENTICATION LOGIC ---
+# --- 4. AUTHENTICATION LOGIC ---
 
 def handle_login(username, password):
     """
-    Simulates user login. 
-    Hardcoded credentials for demonstration.
+    Simulates user login.
+    Credentials: admin/khales23, student/student123
     """
-    # NOTE: Using 'khales23' for admin login password as per previous consensus
     if username == "admin" and password == "khales23":
         st.session_state.is_logged_in = True
         st.session_state.current_user = "admin"
@@ -162,9 +194,8 @@ def show_auth_form():
     with col_form.container(border=True):
         st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
         
-        # Placeholder updated for clarity on required credentials
-        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin or student")
-        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password (student123)")
+        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin (khales23) or student (student123)")
+        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password")
         
         if st.button("Login", key="login_btn_auth", use_container_width=True):
             if login_username and login_password:
@@ -179,17 +210,15 @@ def show_auth_form():
                 st.warning("Please enter both username and password.")
 
 
-# --- MAIN APPLICATION VIEWS ---
+# --- 5. MAIN APPLICATION VIEWS ---
 
 def show_student_wall():
     """Displays the main student submission and voting wall."""
     st.title("📢 FPEP Voice Wall")
     
-    # --- LOGOUT BUTTON ---
     st.sidebar.button("Logout", on_click=handle_logout)
     st.sidebar.markdown(f"**Logged in as:** `{st.session_state.current_user}`")
 
-    # --- COMPOSER SECTION ---
     with st.container(border=True):
         st.subheader("New Submission")
         col1, col2 = st.columns([3, 1])
@@ -206,18 +235,14 @@ def show_student_wall():
     st.markdown("---")
     st.subheader("Recent History (Upvote the problems you agree with)")
 
-    # --- FEED SECTION ---
     df = load_data()
     if not df.empty:
-        # Loop through reversed dataframe (newest first)
         df_display = df.reset_index().iloc[::-1]
         
         for original_index, row in df_display.iterrows():
-            
             post_id = row['index'] 
-            
-            # 1. VISUAL PART (HTML)
             status_class = f"status-{row['Status']}"
+            
             st.markdown(f"""
             <div class="post-card-header">
                 <div class="meta-text">
@@ -228,7 +253,6 @@ def show_student_wall():
             </div>
             """, unsafe_allow_html=True)
             
-            # 2. INTERACTIVE PART (Streamlit Columns)
             col_left, col_btn = st.columns([5, 1])
             
             with col_left:
@@ -239,7 +263,6 @@ def show_student_wall():
                 """, unsafe_allow_html=True)
                 
             with col_btn:
-                # --- VOTING LOGIC ---
                 has_voted = post_id in st.session_state.voted_posts
                 btn_label = f"✅ {row['Upvotes']}" if has_voted else f"👍 {row['Upvotes']}"
                 
@@ -277,45 +300,32 @@ def show_admin_dashboard():
         
         # Editor
         if not df.empty:
-            # Add a temporary column for deletion
             df["Delete"] = False
-            
-            # Reset index needed for correct display and updating logic
             df_editable = df.reset_index(drop=False)
             
             edited_df = st.data_editor(
                 df_editable,
                 column_config={
-                    "index": st.column_config.NumberColumn("Post ID", disabled=True), # Display the internal index
+                    "index": st.column_config.NumberColumn("Post ID", disabled=True), 
                     "Status": st.column_config.SelectboxColumn("Status", options=["New", "Reviewed", "Solved"], required=True),
                     "Delete": st.column_config.CheckboxColumn("Delete?", default=False),
                     "Upvotes": st.column_config.NumberColumn("Votes", disabled=True)
                 },
-                # Disable all columns except Status and Delete
                 disabled=["Timestamp", "Category", "Problem", "Upvotes", "index"],
                 hide_index=True,
                 use_container_width=True
             )
             
             if st.button("Save Changes", key="admin_save_btn"):
-                # 1. Get the indices of posts to keep (where "Delete" is False)
                 posts_to_keep = edited_df[edited_df["Delete"] == False]
-                
-                # 2. Get the original DataFrame index values
                 original_indices_to_keep = posts_to_keep['index'].tolist()
                 
-                # 3. Create a clean version of the original DataFrame to save
-                # Map the changes back to the original index
-                
-                # Update statuses
                 for idx in original_indices_to_keep:
                     new_status = posts_to_keep[posts_to_keep['index'] == idx]['Status'].iloc[0]
                     df.loc[idx, 'Status'] = new_status
                 
-                # Remove deleted rows from the original DF
                 df_final = df.loc[original_indices_to_keep].drop(columns=["Delete"], errors='ignore')
                 
-                # Save the final DF
                 df_final.to_csv(FILE_PATH, index=False)
                 st.success("Changes saved successfully (Statuses updated and deletions processed)!")
                 st.rerun()
@@ -327,12 +337,13 @@ def show_admin_dashboard():
         st.warning("Enter the Admin Action Password to manage posts.")
 
 
-# --- MAIN APP FLOW ---
+# --- 6. MAIN APP FLOW ---
 
 if not st.session_state.is_logged_in:
+    # If not logged in, show the login form
     show_auth_form()
 else:
-    # Logic for logged-in user
+    # If logged in, show the appropriate dashboard
     if st.session_state.current_user == "admin":
         menu = st.sidebar.radio("Navigation", ["📢 Student Wall", "🔒 Admin Dashboard"], index=1)
         if menu == "📢 Student Wall":
@@ -342,4 +353,3 @@ else:
     else:
         # Standard user only sees the Student Wall
         show_student_wall()
-
