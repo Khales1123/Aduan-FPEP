@@ -130,6 +130,8 @@ def handle_login(username, password):
     """
     Simulates user login. 
     Hardcoded credentials for demonstration.
+    NOTE: Admin login password is now set to 'khales23' for simplicity 
+    since it's also the Admin Action Password.
     """
     if username == "admin" and password == "khales23":
         st.session_state.is_logged_in = True
@@ -149,20 +151,19 @@ def handle_logout():
     st.rerun()
 
 def show_auth_form():
-    """Displays the combined Login/Sign Up forms."""
+    """Displays only the Login form."""
     
     st.title("Welcome to the FPEP Voice Wall")
-    st.markdown("Please sign in or register to continue.")
+    st.markdown("Please sign in to continue.")
 
-    # Use Streamlit columns to display Sign In and Sign Up forms side-by-side
-    col1, col2 = st.columns(2)
+    # Use a single, centered column for the login form
+    col_center, col_form, col_center_end = st.columns([1, 2, 1])
 
-    # --- SIGN IN FORM ---
-    with col1.container(border=True):
+    with col_form.container(border=True):
         st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
         
-        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin or student")
-        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="admin or student123")
+        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin (khales23) or student (student123)")
+        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password")
         
         if st.button("Login", key="login_btn_auth", use_container_width=True):
             if login_username and login_password:
@@ -175,18 +176,6 @@ def show_auth_form():
                     st.error("Invalid credentials. Please try again.")
             else:
                 st.warning("Please enter both username and password.")
-
-    # --- SIGN UP FORM ---
-    with col2.container(border=True):
-        st.markdown("<h2>Sign Up</h2>", unsafe_allow_html=True)
-        
-        st.info("Registration is currently disabled in this demo.")
-        
-        st.text_input("Username", key="reg_user_auth", placeholder="Choose a username", disabled=True)
-        st.text_input("Email", key="reg_email_auth", placeholder="Enter your email", disabled=True)
-        st.text_input("Password", type="password", key="reg_pass_auth", placeholder="Choose a secure password", disabled=True)
-        
-        st.button("Sign Up (Disabled)", key="register_btn_auth", use_container_width=True, disabled=True)
 
 
 # --- MAIN APPLICATION VIEWS ---
@@ -273,7 +262,7 @@ def show_admin_dashboard():
     st.sidebar.markdown(f"**Logged in as:** `{st.session_state.current_user}`")
 
     
-    # Admin password check (Admin-specific, separate from the main login)
+    # Admin password check (Admin-specific, separated for data modification)
     admin_password = st.text_input("Admin Action Password", type="password", key="admin_action_pass")
     
     # Use the same admin password logic from the original code
@@ -323,6 +312,7 @@ def show_admin_dashboard():
                 
                 # Update statuses
                 for idx in original_indices_to_keep:
+                    # Find the status for this original index in the edited data
                     new_status = posts_to_keep[posts_to_keep['index'] == idx]['Status'].iloc[0]
                     df.loc[idx, 'Status'] = new_status
                 
@@ -356,5 +346,3 @@ else:
     else:
         # Standard user only sees the Student Wall
         show_student_wall()
-
-
