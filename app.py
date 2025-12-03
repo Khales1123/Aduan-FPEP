@@ -258,7 +258,7 @@ def show_student_wall():
             with col_left:
                 st.markdown(f"""
                 <div class="post-card-body">
-                    <small style='color:#80000'>Posted: {row['Timestamp']}</small>
+                    <small style='color:#A31515'>Posted: {row['Timestamp']}</small>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -353,5 +353,6 @@ else:
     else:
         # Standard user only sees the Student Wall
         show_student_wall()
+
 
 
