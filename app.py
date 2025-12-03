@@ -65,7 +65,7 @@ VIDEO_BACKGROUND_HTML = """
 st.markdown(VIDEO_BACKGROUND_HTML, unsafe_allow_html=True)
 
 
-# --- Custom App Styling (To blend with the video content) ---
+# --- Custom App Styling (Post Styling UPDATED) ---
 st.markdown("""
     <style>
     :root { 
@@ -77,12 +77,34 @@ st.markdown("""
     h1 { color: var(--primary-maroon) !important; }
     h2 { color: var(--primary-blue) !important; text-align: center; }
     
-    /* Post Card Styling (ensure cards are fully opaque white for reading) */
-    .post-card-header, .post-card-body, [data-testid="stContainer"] {
-        background-color: white !important; 
+    /* Post Card Styling: Changed background to MAROON and text to white/light gray */
+    .post-card-header {
+        background-color: var(--primary-maroon) !important; /* DARK MAROON BACKGROUND */
+        padding: 20px 20px 5px 20px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        border-left: 5px solid #a31515; /* Slightly lighter border for depth */
+        color: #F0F0F0; /* Light text color for readability */
+        border: 1px solid #a31515; /* Solid border */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    .post-card-body {
+        background-color: var(--primary-maroon) !important; /* DARK MAROON BACKGROUND */
+        padding: 5px 20px 20px 20px;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        border-left: 5px solid #a31515;
+        color: #F0F0F0; /* Light text color for readability */
+        border-right: 1px solid #a31515;
+        border-bottom: 1px solid #a31515;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        margin-bottom: 20px;
     }
     
-    /* Status Badges */
+    .meta-text { font-size: 14px; color: #F0F0F0; display: flex; justify-content: space-between; } /* Lightened */
+    .main-text { font-size: 16px; color: white; margin-top: 10px; white-space: pre-wrap; } /* Whiteened */
+    
+    /* Status Badges (Kept original colors for contrast) */
     .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;}
     .status-New { background-color: #fff3cd; color: #856404; }
     .status-Reviewed { background-color: #d4edda; color: #155724; }
@@ -194,8 +216,8 @@ def show_auth_form():
     with col_form.container(border=True):
         st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
         
-        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin or student")
-        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password (student123)")
+        login_username = st.text_input("Username", key="login_user_auth", placeholder="admin (khales23) or student (student123)")
+        login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password")
         
         if st.button("Login", key="login_btn_auth", use_container_width=True):
             if login_username and login_password:
@@ -258,9 +280,9 @@ def show_student_wall():
             with col_left:
                 st.markdown(f"""
                 <div class="post-card-body">
-                    <small style='color:#A31515'>Posted: {row['Timestamp']}</small>
+                    <small style='color:#F0F0F0'>Posted: {row['Timestamp']}</small>
                 </div>
-                """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True) # Text color changed to light gray
                 
             with col_btn:
                 has_voted = post_id in st.session_state.voted_posts
@@ -353,6 +375,3 @@ else:
     else:
         # Standard user only sees the Student Wall
         show_student_wall()
-
-
-
