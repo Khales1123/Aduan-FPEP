@@ -43,7 +43,6 @@ VIDEO_BACKGROUND_HTML = """
 }
 
 /* 3. Ensure the main Streamlit content remains readable over the video */
-/* This targets the main content block and the sidebar */
 .stApp > header, 
 .stApp > div:first-child > div:nth-child(2) > div:first-child,
 .stApp > div:nth-child(1) > div:nth-child(1) { 
@@ -65,7 +64,7 @@ VIDEO_BACKGROUND_HTML = """
 st.markdown(VIDEO_BACKGROUND_HTML, unsafe_allow_html=True)
 
 
-# --- Custom App Styling (Post Styling UPDATED) ---
+# --- Custom App Styling (Post Styling UPDATED with Strong Borders) ---
 st.markdown("""
     <style>
     :root { 
@@ -77,34 +76,46 @@ st.markdown("""
     h1 { color: var(--primary-maroon) !important; }
     h2 { color: var(--primary-blue) !important; text-align: center; }
     
-    /* Post Card Styling: Changed background to MAROON and text to white/light gray */
+    /* Post Card Styling: Ensure cards are fully opaque white for reading */
+    [data-testid="stContainer"] {
+        background-color: white !important; 
+    }
+    
+    /* === BORDER CHANGES START HERE === */
     .post-card-header {
         background-color: var(--primary-maroon) !important; /* DARK MAROON BACKGROUND */
         padding: 20px 20px 5px 20px;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
-        border-left: 5px solid #a31515; /* Slightly lighter border for depth */
-        color: #F0F0F0; /* Light text color for readability */
-        border: 1px solid #a31515; /* Solid border */
+        color: #F0F0F0;
+        
+        /* Stronger Border on Top, Left, Right */
+        border: 3px solid var(--light-maroon) !important; 
+        border-bottom: none !important; /* Remove the horizontal dividing line */
         box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
+    
     .post-card-body {
         background-color: var(--primary-maroon) !important; /* DARK MAROON BACKGROUND */
         padding: 5px 20px 20px 20px;
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
-        border-left: 5px solid #a31515;
-        color: #F0F0F0; /* Light text color for readability */
-        border-right: 1px solid #a31515;
-        border-bottom: 1px solid #a31515;
+        color: #F0F0F0;
+        
+        /* Stronger Border on Bottom, Left, Right */
+        border: 3px solid var(--light-maroon) !important;
+        border-top: none !important; /* Remove the horizontal dividing line */
         box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         margin-bottom: 20px;
     }
     
-    .meta-text { font-size: 14px; color: #F0F0F0; display: flex; justify-content: space-between; } /* Lightened */
-    .main-text { font-size: 16px; color: white; margin-top: 10px; white-space: pre-wrap; } /* Whiteened */
+    /* Ensure the metadata and main text are light colored */
+    .meta-text { font-size: 14px; color: #F0F0F0; display: flex; justify-content: space-between; } 
+    .main-text { font-size: 16px; color: white; margin-top: 10px; white-space: pre-wrap; }
+    /* === BORDER CHANGES END HERE === */
+
     
-    /* Status Badges (Kept original colors for contrast) */
+    /* Status Badges */
     .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;}
     .status-New { background-color: #fff3cd; color: #856404; }
     .status-Reviewed { background-color: #d4edda; color: #155724; }
@@ -265,6 +276,7 @@ def show_student_wall():
             post_id = row['index'] 
             status_class = f"status-{row['Status']}"
             
+            # --- POST CARD HEADER (Strong Border Defined in CSS) ---
             st.markdown(f"""
             <div class="post-card-header">
                 <div class="meta-text">
@@ -278,16 +290,22 @@ def show_student_wall():
             col_left, col_btn = st.columns([5, 1])
             
             with col_left:
+                # --- POST CARD BODY LEFT (Part of the continuous border) ---
                 st.markdown(f"""
                 <div class="post-card-body">
                     <small style='color:#F0F0F0'>Posted: {row['Timestamp']}</small>
                 </div>
-                """, unsafe_allow_html=True) # Text color changed to light gray
+                """, unsafe_allow_html=True) 
                 
             with col_btn:
+                # --- BUTTON COLUMN (Visually continuous with post-card-body) ---
+                # Note: We can't apply CSS to st.columns directly, but the main content area has a strong background, 
+                # and the button itself is maroon, helping the visual connection.
                 has_voted = post_id in st.session_state.voted_posts
                 btn_label = f"✅ {row['Upvotes']}" if has_voted else f"👍 {row['Upvotes']}"
                 
+                # Use a transparent button style or similar to fit the design (not possible with current CSS block, 
+                # so we rely on the default Streamlit button style here).
                 if st.button(btn_label, key=f"vote_{post_id}", disabled=has_voted, use_container_width=True):
                     update_vote(post_id)
                     st.session_state.voted_posts.add(post_id)
@@ -362,10 +380,8 @@ def show_admin_dashboard():
 # --- 6. MAIN APP FLOW ---
 
 if not st.session_state.is_logged_in:
-    # If not logged in, show the login form
     show_auth_form()
 else:
-    # If logged in, show the appropriate dashboard
     if st.session_state.current_user == "admin":
         menu = st.sidebar.radio("Navigation", ["📢 Student Wall", "🔒 Admin Dashboard"], index=1)
         if menu == "📢 Student Wall":
@@ -373,5 +389,4 @@ else:
         elif menu == "🔒 Admin Dashboard":
             show_admin_dashboard()
     else:
-        # Standard user only sees the Student Wall
         show_student_wall()
