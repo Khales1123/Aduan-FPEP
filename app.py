@@ -13,8 +13,7 @@ st.set_page_config(page_title="FPEP Voice Wall & Auth", page_icon="🔑", layout
 # NOTE: Replace 'YOUR_VIDEO_URL.mp4' with a direct link to your video file.
 VIDEO_URL = "https://github.com/Khales1123/Aduan-FPEP/blob/a2a0b6a949e480fe122a7c6ff7df369826c1f8ff/YOUR_VIDEO_URL.mp4?raw=true" 
 
-# 1. CSS Styles (Normal String - NO 'f' at the start)
-# We use a normal string here so Python doesn't get confused by the CSS { } braces.
+# 1. CSS Styles
 CSS_STYLES = """
 <style>
 /* 1. Hide the default Streamlit background */
@@ -22,14 +21,14 @@ CSS_STYLES = """
     background: transparent !important;
 }
 
-/* 2. Create the video container and place it on the lowest layer */
+/* 2. Create the video container */
 #video-background-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1000; /* Place it behind everything */
+    z-index: -1000;
     overflow: hidden;
 }
 
@@ -42,18 +41,26 @@ CSS_STYLES = """
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    /* Dim the video slightly to make text easier to read */
     opacity: 0.9; 
 }
 
-/* 3. Ensure the main Streamlit content remains readable over the video */
+/* 3. Make content readable */
 .stApp > header, 
 .stApp > div:first-child > div:nth-child(2) > div:first-child,
 .stApp > div:nth-child(1) > div:nth-child(1) { 
-    background-color: rgba(255, 255, 255, 0.55); /* Semi-transparent white background */
+    background-color: rgba(255, 255, 255, 0.55);
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* --- NEW: THICKER OUTLINE FOR SIGN IN BOX --- */
+/* This targets the container(border=True) specifically */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    border: 4px solid white !important; /* Thicker White Border */
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.85); /* Make the box slightly opaque */
+    box-shadow: 0 0 20px rgba(0,0,0,0.5); /* Add a shadow/glow */
 }
 </style>
 """
@@ -224,15 +231,16 @@ def handle_logout():
 def show_auth_form():
     """Displays only the Login form, centered."""
     
-    st.title("Welcome to the FPEP Voice Wall")
-    st.markdown("Please sign in to continue.")
+    # --- CENTERED TITLES ---
+    st.markdown("<h1 style='text-align: center; color: #800000; text-shadow: 2px 2px 4px #ffffff;'>Welcome to the FPEP Voice Wall</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #1f50a2; margin-bottom: 30px;'>Please sign in to continue.</h3>", unsafe_allow_html=True)
 
     # Use Streamlit columns to center the single login form (2/4 width)
     col_center_left, col_form, col_center_right = st.columns([1, 2, 1])
 
     # --- SIGN IN FORM ---
     with col_form.container(border=True):
-        st.markdown("<h2>Sign In</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; color: #1f50a2;'>Sign In</h2>", unsafe_allow_html=True)
         
         login_username = st.text_input("Username", key="login_user_auth", placeholder="admin or student")
         login_password = st.text_input("Password", type="password", key="login_pass_auth", placeholder="Enter your password (student123)")
@@ -393,6 +401,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
