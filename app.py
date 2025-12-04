@@ -11,8 +11,11 @@ st.set_page_config(page_title="FPEP Voice Wall & Auth", page_icon="🔑", layout
 
 # CSS/HTML to set an MP4 file as a fixed, fullscreen background.
 # NOTE: Replace 'YOUR_VIDEO_URL.mp4' with a direct link to your video file.
-VIDEO_URL = "https://github.com/Khales1123/Aduan-FPEP/blob/a2a0b6a949e480fe122a7c6ff7df369826c1f8ff/YOUR_VIDEO_URL.mp4" # <--- REPLACE THIS
-VIDEO_BACKGROUND_HTML = f"""
+VIDEO_URL = "https://github.com/Khales1123/Aduan-FPEP/blob/a2a0b6a949e480fe122a7c6ff7df369826c1f8ff/YOUR_VIDEO_URL.mp4?raw=true" 
+
+# 1. CSS Styles (Normal String - NO 'f' at the start)
+# We use a normal string here so Python doesn't get confused by the CSS { } braces.
+CSS_STYLES = """
 <style>
 /* 1. Hide the default Streamlit background */
 .stApp {
@@ -47,23 +50,26 @@ VIDEO_BACKGROUND_HTML = f"""
 .stApp > header, 
 .stApp > div:first-child > div:nth-child(2) > div:first-child,
 .stApp > div:nth-child(1) > div:nth-child(1) { 
-    background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white background for readability */
+    background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white background */
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 </style>
+"""
 
-<!-- HTML video injection -->
+# 2. HTML Content (F-String - Keeps the 'f' to insert the VIDEO_URL)
+HTML_CONTENT = f"""
 <div id="video-background-container">
     <video autoplay muted loop>
-        <source src="https://github.com/Khales1123/Aduan-FPEP/blob/a2a0b6a949e480fe122a7c6ff7df369826c1f8ff/YOUR_VIDEO_URL.mp4" type="video/mp4">
+        <source src="{VIDEO_URL}" type="video/mp4">
         Your browser does not support HTML5 video.
     </video>
 </div>
 """
-st.markdown(VIDEO_BACKGROUND_HTML, unsafe_allow_html=True)
 
+# Combine them and render
+st.markdown(CSS_STYLES + HTML_CONTENT, unsafe_allow_html=True)
 
 # --- Custom App Styling (Post Styling UPDATED to Maroon Box with White Border) ---
 st.markdown("""
@@ -387,6 +393,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
