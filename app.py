@@ -233,7 +233,7 @@ def show_auth_form():
     
     # --- CENTERED TITLES ---
     st.markdown("<h1 style='text-align: center; color: #800000; text-shadow: 2px 2px 4px #ffffff;'>Welcome to the FPEP Voice Wall</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center; color: #1f50a2; margin-bottom: 30px;'>Please sign in to continue.</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #800000; margin-bottom: 30px;'>Please sign in to continue.</h3>", unsafe_allow_html=True)
 
     # Use Streamlit columns to center the single login form (2/4 width)
     col_center_left, col_form, col_center_right = st.columns([1, 2, 1])
@@ -401,6 +401,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
