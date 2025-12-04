@@ -50,7 +50,7 @@ CSS_STYLES = """
 .stApp > header, 
 .stApp > div:first-child > div:nth-child(2) > div:first-child,
 .stApp > div:nth-child(1) > div:nth-child(1) { 
-    background-color: rgba(255, 255, 255, 0.65); /* Semi-transparent white background */
+    background-color: rgba(255, 255, 255, 0.25); /* Semi-transparent white background */
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -394,6 +394,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
