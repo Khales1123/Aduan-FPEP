@@ -60,7 +60,7 @@ CSS_STYLES = """
     border: 10px solid white !important;  /* Make border White and Thicker (10px) */
     border-radius: 15px !important;      /* Round the corners */
     background-color: rgba(255, 255, 255, 0.2); /* Optional: Slightly separate the box from background */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5); /* Add a glow shadow */
+    box-shadow: 0 0 15px rgba(0,0,0,0.5); /* Add a glow shadow */
 }
 </style>
 """
@@ -401,6 +401,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
