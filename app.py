@@ -13,7 +13,8 @@ st.set_page_config(page_title="FPEP Voice Wall & Auth", page_icon="🔑", layout
 # NOTE: Replace 'YOUR_VIDEO_URL.mp4' with a direct link to your video file.
 VIDEO_URL = "https://github.com/Khales1123/Aduan-FPEP/blob/a2a0b6a949e480fe122a7c6ff7df369826c1f8ff/YOUR_VIDEO_URL.mp4?raw=true" 
 
-# 1. CSS Styles
+# 1. CSS Styles (Normal String - NO 'f' at the start)
+# We use a normal string here so Python doesn't get confused by the CSS { } braces.
 CSS_STYLES = """
 <style>
 /* 1. Hide the default Streamlit background */
@@ -21,14 +22,14 @@ CSS_STYLES = """
     background: transparent !important;
 }
 
-/* 2. Create the video container */
+/* 2. Create the video container and place it on the lowest layer */
 #video-background-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1000;
+    z-index: -1000; /* Place it behind everything */
     overflow: hidden;
 }
 
@@ -41,26 +42,18 @@ CSS_STYLES = """
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0.9; 
+    /* Dim the video slightly to make text easier to read */
+    opacity: 0.7; 
 }
 
-/* 3. Make content readable */
+/* 3. Ensure the main Streamlit content remains readable over the video */
 .stApp > header, 
 .stApp > div:first-child > div:nth-child(2) > div:first-child,
 .stApp > div:nth-child(1) > div:nth-child(1) { 
-    background-color: rgba(255, 255, 255, 0.55);
+    background-color: rgba(255, 255, 255, 0.65); /* Semi-transparent white background */
     padding: 10px;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 2.5);
-}
-
-/* --- NEW: THICKER OUTLINE FOR SIGN IN BOX --- */
-/* This specific command targets the container(border=True) */
-[data-testid="stVerticalBlockBorderWrapper"] {
-    border: 10px solid white !important;  /* Make border White and Thicker (10px) */
-    border-radius: 15px !important;      /* Round the corners */
-    background-color: rgba(255, 255, 255, 0.2); /* Optional: Slightly separate the box from background */
-    box-shadow: 0 0 15px rgba(0,0,0,0.5); /* Add a glow shadow */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 </style>
 """
@@ -401,6 +394,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
