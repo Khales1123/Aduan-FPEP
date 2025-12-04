@@ -386,8 +386,3 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
-
-
-
-SAYA ADA PATH FILE UNTUK VID, MCM MANA NAK LETAK DLM PYTHON?
-"C:\Users\khali\Downloads\try test\YOUR_VIDEO_URL.mp4"
