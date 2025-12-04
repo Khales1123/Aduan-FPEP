@@ -12,7 +12,7 @@ st.set_page_config(page_title="FPEP Voice Wall & Auth", page_icon="🔑", layout
 
 # 1. Update this path to match your specific file.
 # NOTE: Use 'r' before the quote to handle Windows backslashes correctly.
-video_path = r""C:\Users\khali\Downloads\YOUR_VIDEO_URL.mp4""
+video_path = r"C:\Users\khali\Downloads\YOUR_VIDEO_URL.mp4"
 
 def get_base64_of_bin_file(bin_file):
     """
@@ -333,6 +333,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
