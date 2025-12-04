@@ -51,7 +51,7 @@ CSS_STYLES = """
     background-color: rgba(255, 255, 255, 0.55);
     padding: 10px;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 2.5);
 }
 
 /* --- NEW: THICKER OUTLINE FOR SIGN IN BOX --- */
@@ -401,6 +401,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
