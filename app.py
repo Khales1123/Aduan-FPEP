@@ -57,7 +57,7 @@ CSS_STYLES = """
 /* --- NEW: THICKER OUTLINE FOR SIGN IN BOX --- */
 /* This specific command targets the container(border=True) */
 [data-testid="stVerticalBlockBorderWrapper"] {
-    border: 3px solid white !important;  /* Make border White and Thicker (3px) */
+    border: 10px solid white !important;  /* Make border White and Thicker (10px) */
     border-radius: 15px !important;      /* Round the corners */
     background-color: rgba(255, 255, 255, 0.2); /* Optional: Slightly separate the box from background */
     box-shadow: 0 0 15px rgba(0,0,0,0.5); /* Add a glow shadow */
@@ -401,6 +401,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
