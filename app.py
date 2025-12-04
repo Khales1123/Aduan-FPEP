@@ -3,33 +3,53 @@ import pandas as pd
 from datetime import datetime, timedelta, timezone
 import os
 import time # Used for simulating delays
+import base64
 
 # --- 1. CONFIGURATION & DESIGN ---
 st.set_page_config(page_title="FPEP Voice Wall & Auth", page_icon="🔑", layout="centered")
 
 # --- VIDEO BACKGROUND INJECTION ---
 
-# CSS/HTML to set an MP4 file as a fixed, fullscreen background.
-# NOTE: Replace 'YOUR_VIDEO_URL.mp4' with a direct link to your video file.
-VIDEO_BACKGROUND_HTML = """
-<style>
-/* 1. Hide the default Streamlit background */
-.stApp {
-    background: transparent !important;
-}
+# 1. Update this path to match your specific file.
+# NOTE: Use 'r' before the quote to handle Windows backslashes correctly.
+video_path = r"C:\Users\khali\Downloads\try test\YOUR_VIDEO_URL.mp4"
 
-/* 2. Create the video container and place it on the lowest layer */
-#video-background-container {
+def get_base64_of_bin_file(bin_file):
+    """
+    Reads a binary file and converts it to a base64 string
+    so it can be embedded in HTML.
+    """
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except FileNotFoundError:
+        st.error("Video file not found. Please check the path.")
+        return ""
+
+# 2. Get the base64 string
+bin_str = get_base64_of_bin_file(video_path)
+
+# 3. Inject the base64 string into the HTML
+VIDEO_BACKGROUND_HTML = f"""
+<style>
+/* Hide the default Streamlit background */
+.stApp {{
+    background: transparent !important;
+}}
+
+/* Create the video container */
+#video-background-container {{
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1000; /* Place it behind everything */
+    z-index: -1000;
     overflow: hidden;
-}
+}}
 
-#video-background-container video {
+#video-background-container video {{
     min-width: 100%; 
     min-height: 100%;
     width: auto;
@@ -38,103 +58,30 @@ VIDEO_BACKGROUND_HTML = """
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    /* Dim the video slightly to make text easier to read */
     opacity: 0.7; 
-}
+    object-fit: cover; /* Ensures video fills the screen */
+}}
 
-/* 3. Ensure the main Streamlit content remains readable over the video */
+/* Ensure the main Streamlit content remains readable */
 .stApp > header, 
 .stApp > div:first-child > div:nth-child(2) > div:first-child,
-.stApp > div:nth-child(1) > div:nth-child(1) { 
-    background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white background for readability */
+.stApp > div:nth-child(1) > div:nth-child(1) {{ 
+    background-color: rgba(255, 255, 255, 0.85);
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+}}
 </style>
 
-<!-- HTML video injection -->
 <div id="video-background-container">
-    <video autoplay muted loop>
-        <source src="YOUR_VIDEO_URL.mp4" type="video/mp4">
+    <video autoplay muted loop playsinline>
+        <source src="data:video/mp4;base64,{bin_str}" type="video/mp4">
         Your browser does not support HTML5 video.
     </video>
 </div>
 """
+
 st.markdown(VIDEO_BACKGROUND_HTML, unsafe_allow_html=True)
-
-
-# --- Custom App Styling (Post Styling UPDATED to Maroon Box with White Border) ---
-st.markdown("""
-    <style>
-    :root { 
-        --primary-maroon: #800000; 
-        --light-maroon: #a31515; 
-        --primary-blue: #1f50a2;
-    }
-    
-    h1 { color: var(--primary-maroon) !important; }
-    h2 { color: var(--primary-blue) !important; text-align: center; }
-    
-    /* Post Card Styling: Background is MAROON, Text is Light */
-    [data-testid="stContainer"] {
-        background-color: white !important; 
-    }
-    
-    /* === BORDER & COLOR CHANGES START HERE === */
-    .post-card-header {
-        background-color: var(--primary-maroon) !important; /* MAROON BACKGROUND */
-        padding: 20px 20px 5px 20px;
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-        color: #F0F0F0; /* Light text color */
-        
-        /* Strong WHITE Border (3px) */
-        border: 3px solid white !important; 
-        border-bottom: none !important; /* Seamless connection */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    }
-    
-    .post-card-body {
-        background-color: var(--primary-maroon) !important; /* MAROON BACKGROUND */
-        padding: 5px 20px 20px 20px;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-        color: #F0F0F0; /* Light text color */
-        
-        /* Strong WHITE Border (3px) */
-        border: 3px solid white !important;
-        border-top: none !important; /* Seamless connection */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        margin-bottom: 20px;
-    }
-    
-    /* Ensure the metadata and main text are light colored */
-    .meta-text { font-size: 14px; color: #F0F0F0; display: flex; justify-content: space-between; } 
-    .main-text { font-size: 16px; color: white; margin-top: 10px; white-space: pre-wrap; }
-    /* === BORDER & COLOR CHANGES END HERE === */
-
-    
-    /* Status Badges */
-    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;}
-    .status-New { background-color: #fff3cd; color: #856404; }
-    .status-Reviewed { background-color: #d4edda; color: #155724; }
-    .status-Solved { background-color: #cce5ff; color: #004085; }
-    
-    /* Customizing Auth Buttons */
-    .stButton>button {
-        background-color: var(--primary-blue);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px;
-        width: 100%;
-        margin-top: 15px;
-    }
-    
-    </style>
-""", unsafe_allow_html=True)
-
 
 # --- 2. INITIALIZATION ---
 if "is_logged_in" not in st.session_state:
@@ -386,4 +333,5 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
