@@ -43,7 +43,7 @@ CSS_STYLES = """
     left: 50%;
     transform: translate(-50%, -50%);
     /* Dim the video slightly to make text easier to read */
-    opacity: 0.7; 
+    opacity: 0.9; 
 }
 
 /* 3. Ensure the main Streamlit content remains readable over the video */
@@ -393,6 +393,7 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
 
