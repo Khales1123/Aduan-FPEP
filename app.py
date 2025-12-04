@@ -11,7 +11,8 @@ st.set_page_config(page_title="FPEP Voice Wall & Auth", page_icon="🔑", layout
 
 # CSS/HTML to set an MP4 file as a fixed, fullscreen background.
 # NOTE: Replace 'YOUR_VIDEO_URL.mp4' with a direct link to your video file.
-VIDEO_BACKGROUND_HTML = """
+VIDEO_URL = "https://github.com/Khales1123/Aduan-FPEP/blob/a2a0b6a949e480fe122a7c6ff7df369826c1f8ff/YOUR_VIDEO_URL.mp4" # <--- REPLACE THIS
+VIDEO_BACKGROUND_HTML = f"""
 <style>
 /* 1. Hide the default Streamlit background */
 .stApp {
@@ -56,7 +57,7 @@ VIDEO_BACKGROUND_HTML = """
 <!-- HTML video injection -->
 <div id="video-background-container">
     <video autoplay muted loop>
-        <source src="YOUR_VIDEO_URL.mp4" type="video/mp4">
+        <source src="https://github.com/Khales1123/Aduan-FPEP/blob/a2a0b6a949e480fe122a7c6ff7df369826c1f8ff/YOUR_VIDEO_URL.mp4" type="video/mp4">
         Your browser does not support HTML5 video.
     </video>
 </div>
@@ -386,5 +387,6 @@ else:
             show_admin_dashboard()
     else:
         show_student_wall()
+
 
 
